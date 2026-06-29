@@ -3,7 +3,7 @@ import uniqueId from 'lodash/uniqueId'
 import isEmpty from 'lodash/isEmpty'
 
 export default function authFakeApi(server: Server, apiPrefix: string) {
-    server.post(`${apiPrefix}/sign-in`, (schema, { requestBody }) => {
+    server.post(`${apiPrefix}/admin/login`, (schema, { requestBody }) => {
         const { email, password } = JSON.parse(requestBody)
         const user = schema.db.signInUserData.findBy({
             email: email,
@@ -24,11 +24,11 @@ export default function authFakeApi(server: Server, apiPrefix: string) {
         )
     })
 
-    server.post(`${apiPrefix}/sign-out`, () => {
+    server.post(`${apiPrefix}/admin/logout`, () => {
         return true
     })
 
-    server.post(`${apiPrefix}/sign-up`, (schema, { requestBody }) => {
+    server.post(`${apiPrefix}/admin/sign-up`, (schema, { requestBody }) => {
         const { userName, password, email } = JSON.parse(requestBody)
         const userExist = schema.db.signInUserData.findBy({
             accountUserName: userName,
@@ -72,11 +72,11 @@ export default function authFakeApi(server: Server, apiPrefix: string) {
         }
     })
 
-    server.post(`${apiPrefix}/forgot-password`, () => {
+    server.post(`${apiPrefix}/admin/forgot-password`, () => {
         return true
     })
 
-    server.post(`${apiPrefix}/reset-password`, () => {
+    server.post(`${apiPrefix}/admin/reset-password`, () => {
         return true
     })
 }

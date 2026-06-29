@@ -23,7 +23,9 @@ function useAuth() {
 
     const { token, signedIn } = useAppSelector((state) => state.auth.session)
 
-    const handleAuthAction = async (apiCall: Promise<any>) => {
+    const handleAuthAction = async (
+        apiCall: Promise<any>
+    ): Promise<{ status: Status; message: string } | undefined> => {
         try {
             const resp = await apiCall
             if (resp.data) {

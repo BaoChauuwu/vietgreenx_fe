@@ -23,7 +23,7 @@ export async function apiSignIn(data: SignInCredential) {
 
 export async function apiSignUp(data: SignUpCredential) {
     return ApiService.fetchData<SignUpResponse>({
-        url: '/admin/sign-up', // Note: This doesn't exist in backend yet
+        url: '/admin/sign-up',
         method: 'post',
         data,
     })
@@ -31,7 +31,7 @@ export async function apiSignUp(data: SignUpCredential) {
 
 export async function apiSignOut() {
     return ApiService.fetchData({
-        url: '/admin/logout', // Note: This doesn't exist in backend yet
+        url: '/admin/logout',
         method: 'post',
     })
 }
