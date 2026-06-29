@@ -9,9 +9,8 @@ import type {
 } from '@/@types/auth'
 
 export async function apiSignIn(data: SignInCredential) {
-    // Map the frontend's 'userName' to backend's 'email'
     const backendData = {
-        email: (data as any).userName || (data as any).email,
+        email: data.email,
         password: data.password,
     }
 
@@ -24,7 +23,7 @@ export async function apiSignIn(data: SignInCredential) {
 
 export async function apiSignUp(data: SignUpCredential) {
     return ApiService.fetchData<SignUpResponse>({
-        url: '/sign-up',
+        url: '/admin/sign-up', // Note: This doesn't exist in backend yet
         method: 'post',
         data,
     })
@@ -32,14 +31,14 @@ export async function apiSignUp(data: SignUpCredential) {
 
 export async function apiSignOut() {
     return ApiService.fetchData({
-        url: '/sign-out',
+        url: '/admin/logout', // Note: This doesn't exist in backend yet
         method: 'post',
     })
 }
 
 export async function apiForgotPassword(data: ForgotPassword) {
     return ApiService.fetchData({
-        url: '/forgot-password',
+        url: '/admin/forgot-password',
         method: 'post',
         data,
     })
@@ -47,7 +46,7 @@ export async function apiForgotPassword(data: ForgotPassword) {
 
 export async function apiResetPassword(data: ResetPassword) {
     return ApiService.fetchData({
-        url: '/reset-password',
+        url: '/admin/reset-password',
         method: 'post',
         data,
     })

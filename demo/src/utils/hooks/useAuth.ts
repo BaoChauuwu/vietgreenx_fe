@@ -23,23 +23,13 @@ function useAuth() {
 
     const { token, signedIn } = useAppSelector((state) => state.auth.session)
 
-    const signIn = async (
-        values: SignInCredential
-    ): Promise<
-        | {
-              status: Status
-              message: string
-          }
-        | undefined
-    > => {
+    const handleAuthAction = async (apiCall: Promise<any>) => {
         try {
-            const resp = await apiSignIn(values)
+            const resp = await apiCall
             if (resp.data) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const responseData = (resp.data as any).data || (resp.data as any)
+                const responseData = resp.data.data ? resp.data.data : resp.data
                 const { accessToken, profile } = responseData
-                
-                // Fallback to token/user if mock is still used
+
                 const actualToken = accessToken || responseData.token
                 const actualUser = profile || responseData.user
 
@@ -48,22 +38,27 @@ function useAuth() {
                     dispatch(
                         setUser({
                             avatar: actualUser.avatar || '',
-                            userName: actualUser.firstName ? `${actualUser.firstName} ${actualUser.lastName}`.trim() : (actualUser.userName || 'Anonymous'),
-                            authority: actualUser.role ? [actualUser.role] : (actualUser.authority || ['USER']),
+                            userName: actualUser.firstName
+                                ? `${actualUser.firstName} ${actualUser.lastName}`.trim()
+                                : actualUser.userName || 'Anonymous',
+                            authority: actualUser.role
+                                ? [actualUser.role]
+                                : actualUser.authority || ['USER'],
                             email: actualUser.email || '',
-                        })
+                        }),
                     )
                 }
                 const redirectUrl = query.get(REDIRECT_URL_KEY)
                 navigate(
-                    redirectUrl ? redirectUrl : appConfig.authenticatedEntryPath
+                    redirectUrl
+                        ? redirectUrl
+                        : appConfig.authenticatedEntryPath,
                 )
                 return {
                     status: 'success',
                     message: '',
                 }
             }
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         } catch (errors: any) {
             return {
                 status: 'failed',
@@ -72,45 +67,20 @@ function useAuth() {
         }
     }
 
-    const signUp = async (values: SignUpCredential) => {
-        try {
-            const resp = await apiSignUp(values)
-            if (resp.data) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const responseData = (resp.data as any).data || (resp.data as any)
-                const { accessToken, profile } = responseData
-                
-                // Fallback to token/user if mock is still used
-                const actualToken = accessToken || responseData.token
-                const actualUser = profile || responseData.user
+    const signIn = async (
+        values: SignInCredential,
+    ): Promise<
+        | {
+              status: Status
+              message: string
+          }
+        | undefined
+    > => {
+        return handleAuthAction(apiSignIn(values))
+    }
 
-                dispatch(signInSuccess(actualToken))
-                if (actualUser) {
-                    dispatch(
-                        setUser({
-                            avatar: actualUser.avatar || '',
-                            userName: actualUser.firstName ? `${actualUser.firstName} ${actualUser.lastName}`.trim() : (actualUser.userName || 'Anonymous'),
-                            authority: actualUser.role ? [actualUser.role] : (actualUser.authority || ['USER']),
-                            email: actualUser.email || '',
-                        })
-                    )
-                }
-                const redirectUrl = query.get(REDIRECT_URL_KEY)
-                navigate(
-                    redirectUrl ? redirectUrl : appConfig.authenticatedEntryPath
-                )
-                return {
-                    status: 'success',
-                    message: '',
-                }
-            }
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-        } catch (errors: any) {
-            return {
-                status: 'failed',
-                message: errors?.response?.data?.message || errors.toString(),
-            }
-        }
+    const signUp = async (values: SignUpCredential) => {
+        return handleAuthAction(apiSignUp(values))
     }
 
     const handleSignOut = () => {
@@ -121,18 +91,21 @@ function useAuth() {
                 userName: '',
                 email: '',
                 authority: [],
-            })
+            }),
         )
         navigate(appConfig.unAuthenticatedEntryPath)
     }
 
     const signOut = async () => {
-        await apiSignOut()
-        handleSignOut()
+        try {
+            await apiSignOut()
+        } finally {
+            handleSignOut()
+        }
     }
 
     return {
-        authenticated: token && signedIn,
+        authenticated: Boolean(token && signedIn),
         signIn,
         signUp,
         signOut,
